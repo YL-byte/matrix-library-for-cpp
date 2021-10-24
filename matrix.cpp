@@ -177,7 +177,7 @@ class Matrix{
             //Start making all entries above the leading entry to 0
             for (int row_index = rows - 1; row_index >= 0; row_index--){
                 int leading_entry_column = 0;
-                while (matrix[row_index][leading_entry_column] == 0 && leading_entry_column < columns){
+                while (distance(matrix[row_index][leading_entry_column], 0) < PRECISION && leading_entry_column < columns){
                     leading_entry_column++;
                 }
                 if(leading_entry_column < columns){
@@ -207,7 +207,7 @@ class Matrix{
                 throw;
             }
 
-            if (det() == 0){
+            if (distance(det(), 0) < PRECISION){
                 printf("Singuar matrix does not have an inverse.\n");
                 throw;
             }
@@ -419,7 +419,7 @@ Matrix reducedRowEchelonForm(Matrix M){
     //Start making all entries above the leading entry to 0
     for (int row_index = reducedMatrix.rows - 1; row_index >= 0; row_index--){
         int leading_entry_column = 0;
-        while (reducedMatrix.matrix[row_index][leading_entry_column] == 0 && leading_entry_column < reducedMatrix.columns){
+        while (distance(reducedMatrix.matrix[row_index][leading_entry_column], 0) < PRECISION && leading_entry_column < reducedMatrix.columns){
             leading_entry_column++;
         }
         if(leading_entry_column < reducedMatrix.columns){

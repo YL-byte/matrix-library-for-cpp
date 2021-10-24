@@ -27,6 +27,38 @@ class Matrix{
         Matrix *all_matrices = NULL;
         int number_of_matrices = 0;
 
+        Matrix operator +(Matrix secondMatrix){
+            if(columns != secondMatrix.columns || rows != secondMatrix.rows){
+                printf("A.shape must match B.shape\n");
+                throw("Logic");
+            }
+            Matrix newMatrix(rows, columns);
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                        newMatrix.matrix[row_index][column_index] = matrix[row_index][column_index] + secondMatrix.matrix[row_index][column_index];
+                }
+            }
+            return newMatrix;
+        }
+
+        Matrix operator*(float scalar){
+            Matrix newMatrix(rows, columns);
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    newMatrix.matrix[row_index][column_index] = matrix[row_index][column_index] * scalar;
+                }
+            }
+            return newMatrix;
+        }
+
+        void operator=(float arr[]){
+            for (int i = 0; i < columns * rows; i++){
+                int row_index = i % rows;
+                int column_index = i / rows;
+                matrix[row_index][column_index] = arr[i];
+            }
+        }
+
         Matrix(int aRows, int aColumns){
             rows = aRows;
             columns = aColumns;
@@ -443,4 +475,3 @@ Matrix reducedRowEchelonForm(Matrix M){
 
     return reducedMatrix;
 }
-

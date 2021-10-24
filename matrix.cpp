@@ -51,10 +51,31 @@ class Matrix{
             return newMatrix;
         }
 
+        Matrix operator*(Matrix leftMatrix){
+            if(columns != leftMatrix.rows){
+                printf("A.columns Must Be Equal To B.rows.\n");
+                throw("Logic");
+            }
+
+            Matrix newMatrix(rows, leftMatrix.columns);
+            //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < leftMatrix.columns; column_index++){
+                    float value = 0;
+                    for (int i = 0; i < columns; i++){
+                        value += matrix[row_index][i] * leftMatrix.matrix[i][column_index];
+                    }
+                    newMatrix.matrix[row_index][column_index] = value;
+                }
+            }
+
+            return newMatrix;
+        }
+
         void operator=(float arr[]){
             for (int i = 0; i < columns * rows; i++){
-                int row_index = i % rows;
-                int column_index = i / rows;
+                int column_index = i % columns;
+                int row_index = i / columns;
                 matrix[row_index][column_index] = arr[i];
             }
         }

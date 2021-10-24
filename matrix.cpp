@@ -136,6 +136,112 @@ class Matrix{
             return result;
         }
 
+        void reducedRowEchelonForm_(){
+            int leading_entry_row_index = 0; //What Row are we at
+            int leading_entry_column_index = 0; //What Column are we at
+
+            while (leading_entry_column_index < columns && leading_entry_row_index < rows){
+                int chosen_row = -1, chosen_column = -1;
+                for (int row_index = leading_entry_row_index; row_index < rows; row_index++){
+                    for (int column_index = leading_entry_column_index; column_index < columns; column_index++){
+                        if(distance(matrix[row_index][column_index], 0) > PRECISION){
+                            if(chosen_row == -1 || column_index < chosen_column){
+                                chosen_row = row_index;
+                                chosen_column = column_index;
+                            }
+                        }
+                    }
+                }
+
+                //It means we are done because all rows below are zeros
+                if(chosen_row == -1){
+                    break;
+                }
+
+                leading_entry_column_index = chosen_column;
+                swap_rows(chosen_row, leading_entry_row_index);
+                float scalar_to_norm_row = 1 / matrix[leading_entry_row_index][leading_entry_column_index];
+                //printf("SHOULDCHANGGERE\n");
+                scalar_row(leading_entry_row_index, scalar_to_norm_row);
+
+                for (int row_below_index = leading_entry_row_index + 1; row_below_index < rows; row_below_index++){
+                    //If it equals zero we don't need to do anything
+                    if (matrix[row_below_index][leading_entry_column_index] != 0){
+                        float scalar_to_norm_row = -1 / matrix[row_below_index][leading_entry_column_index];
+                        scalar_row(row_below_index, scalar_to_norm_row);
+                        add_rows(row_below_index, leading_entry_row_index);
+                    }
+                }
+                leading_entry_row_index++;
+            }
+            //Start making all entries above the leading entry to 0
+            for (int row_index = rows - 1; row_index >= 0; row_index--){
+                int leading_entry_column = 0;
+                while (matrix[row_index][leading_entry_column] == 0 && leading_entry_column < columns){
+                    leading_entry_column++;
+                }
+                if(leading_entry_column < columns){
+                    for (int above_row_index = row_index - 1; above_row_index >= 0; above_row_index--){
+                        if(matrix[above_row_index][leading_entry_column] != 0){
+                            float scalar_to_norm_row = -1 * matrix[above_row_index][leading_entry_column];
+                            add_rows(above_row_index, row_index, scalar_to_norm_row);
+                        }
+                    }
+                }
+            }
+
+            //Change -0.00 to 0.00
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    if(matrix[row_index][column_index] == -0){
+                        matrix[row_index][column_index] = 0;
+                    }
+                }
+            }
+
+        }
+
+        Matrix inverse(){
+            if(columns != rows){
+                printf("Matrix must be square to have inverse.\n");
+                throw;
+            }
+
+            if (det() == 0){
+                printf("Singuar matrix does not have an inverse.\n");
+                throw;
+            }
+
+            Matrix inverseMatrix = copyMatrix();
+
+            inverseMatrix.columns *= 2;
+
+            //We will get the inverse by taking the matrix and joining the identity matrix to the left of it and then making the rref
+            //Expand each row by twice the number of columns
+            for (int row_index = 0; row_index < rows; row_index++){
+                inverseMatrix.matrix[row_index] = (float *) realloc(inverseMatrix.matrix[row_index], sizeof(float) * columns * 2);
+                for (int column_index = columns; column_index < 2 * columns; column_index++){
+                    if (column_index == row_index + columns){
+                        inverseMatrix.matrix[row_index][column_index] = 1;
+                    }
+                    else {
+                        inverseMatrix.matrix[row_index][column_index] = 0;
+                    }
+                }
+            }
+            inverseMatrix.reducedRowEchelonForm_();
+            //Return each row to the original number of columns
+            for (int row_index = 0; row_index < rows; row_index++){
+                for(int column_index = 0; column_index < columns * 2; column_index++){
+                    inverseMatrix.matrix[row_index][column_index] = inverseMatrix.matrix[row_index][column_index + columns];
+                }
+                inverseMatrix.matrix[row_index] = (float *)realloc(inverseMatrix.matrix[row_index], sizeof(float) * columns);
+            }
+            inverseMatrix.columns /= 2;
+            return inverseMatrix;
+
+        }
+
         void swap_rows(int row_a, int row_b){
             for (int i = 0; i < columns; i++){
                 float temp = matrix[row_a][i];

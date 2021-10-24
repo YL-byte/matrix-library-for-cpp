@@ -169,6 +169,34 @@ class Matrix{
             return transposedMatrix;
         }
 
+        void transpose_(){
+             float **current_matrix = (float **)malloc(sizeof(float *) * rows);
+             //Create Copy Of Current Matrix and free current matrix
+             for (int row_index = 0; row_index < rows; row_index++){
+                current_matrix[row_index] = (float *)malloc(sizeof(float) * columns);
+                for (int column_index = 0; column_index < columns; column_index++){
+                    current_matrix[row_index][column_index] = matrix[row_index][column_index];
+                }
+                free(matrix[row_index]);
+             }
+
+             //Change rows and columns
+             int temp = rows;
+             rows = columns;
+             columns = temp;
+
+             matrix = (float **)realloc(matrix, sizeof(float *) * rows);
+             for (int row_index = 0; row_index < rows; row_index++){
+                matrix[row_index] = (float *)malloc(sizeof(float) * columns);
+                for (int column_index = 0; column_index < columns; column_index++){
+                    matrix[row_index][column_index] = current_matrix[column_index][row_index];
+                }
+             }
+             for (int old_row_index = 0; old_row_index < columns; old_row_index++){
+                free(current_matrix[old_row_index]);
+             }
+             free(current_matrix);
+        }
 
         Matrix copyMatrix(){
             Matrix newMatrix(rows, columns);

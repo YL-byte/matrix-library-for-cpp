@@ -4,7 +4,10 @@
 using namespace std;
 
 //Function declaration - Part 1
+
+class Matrix;
 float det_rec(float **matrix, int n);
+void changeZeros(Matrix M);
 
 float return_min(float a, float b){
     return (a <= b) * a + (a > b) * b;
@@ -38,6 +41,7 @@ class Matrix{
                         newMatrix.matrix[row_index][column_index] = matrix[row_index][column_index] + secondMatrix.matrix[row_index][column_index];
                 }
             }
+            changeZeros(newMatrix);
             return newMatrix;
         }
 
@@ -48,6 +52,7 @@ class Matrix{
                     newMatrix.matrix[row_index][column_index] = matrix[row_index][column_index] * scalar;
                 }
             }
+            changeZeros(newMatrix);
             return newMatrix;
         }
 
@@ -57,6 +62,22 @@ class Matrix{
                     matrix[row_index][column_index] *= scalar;
                 }
             }
+            changeZeros_();
+        }
+
+        void operator += (Matrix leftMatrix){
+            if(columns != leftMatrix.columns || rows != leftMatrix.rows){
+                printf("Matrices Shapes Must Be Equal.\n");
+                throw("Logic");
+            }
+
+            //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < leftMatrix.columns; column_index++){
+                    matrix[row_index][column_index] += leftMatrix.matrix[row_index][column_index];
+                }
+            }
+            changeZeros_();
         }
 
         Matrix operator*(Matrix leftMatrix){
@@ -76,7 +97,7 @@ class Matrix{
                     newMatrix.matrix[row_index][column_index] = value;
                 }
             }
-
+            changeZeros(newMatrix);
             return newMatrix;
         }
 
@@ -101,6 +122,17 @@ class Matrix{
              }
             return true;
         }
+
+        void inverse_(){
+            Matrix inverMatrix = inverse();
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    matrix[row_index][column_index] = inverMatrix.matrix[row_index][column_index];
+                }
+            }
+            inverMatrix.freeMatrix_();
+        }
+
 
         Matrix(int aRows, int aColumns){
             rows = aRows;
@@ -153,6 +185,7 @@ class Matrix{
                     matrix[row_index][column_index] += A.matrix[row_index][column_index];
                 }
             }
+            changeZeros_();
         }
 
         void scalar_(float scalar){
@@ -161,9 +194,11 @@ class Matrix{
                     matrix[row_index][column_index] *= scalar;
                 }
             }
+            changeZeros_();
         }
 
         void printMatrix(char space = ' '){
+            changeZeros_();
             for (int row_index = 0; row_index < rows; row_index++){
                 for(int column_index = 0; column_index < columns; column_index++){
                     printf("%.2f%c", matrix[row_index][column_index], space);
@@ -180,14 +215,25 @@ class Matrix{
             free(matrix);
         }
 
+        void changeZeros_(){
+            //Change -0.00 to 0.00
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    if(matrix[row_index][column_index] == -0){
+                        matrix[row_index][column_index] = 0;
+                    }
+                }
+            }
+        }
+
         Matrix transpose(){
             Matrix transposedMatrix = Matrix(columns, rows);
              for (int row_index = 0; row_index < rows; row_index++){
                 for(int column_index = 0; column_index < columns; column_index++){
                     transposedMatrix.matrix[column_index][row_index] = matrix[row_index][column_index];
                 }
-                printf("\n");
             }
+            changeZeros(transposedMatrix);
             return transposedMatrix;
         }
 
@@ -218,6 +264,7 @@ class Matrix{
                 free(current_matrix[old_row_index]);
              }
              free(current_matrix);
+             changeZeros_();
         }
 
         Matrix copyMatrix(){
@@ -292,16 +339,7 @@ class Matrix{
                     }
                 }
             }
-
-            //Change -0.00 to 0.00
-            for (int row_index = 0; row_index < rows; row_index++){
-                for (int column_index = 0; column_index < columns; column_index++){
-                    if(matrix[row_index][column_index] == -0){
-                        matrix[row_index][column_index] = 0;
-                    }
-                }
-            }
-
+            changeZeros_();
         }
 
         Matrix inverse(){
@@ -341,6 +379,7 @@ class Matrix{
                 inverseMatrix.matrix[row_index] = (float *)realloc(inverseMatrix.matrix[row_index], sizeof(float) * columns);
             }
             inverseMatrix.columns /= 2;
+            changeZeros(inverseMatrix);
             return inverseMatrix;
 
         }
@@ -395,6 +434,7 @@ Matrix operator *(float scalar, Matrix M){
             newMatrix.matrix[row_index][column_index] = M.matrix[row_index][column_index] * scalar;
         }
     }
+    changeZeros(newMatrix);
     return newMatrix;
 }
 
@@ -402,6 +442,17 @@ Matrix operator *(float scalar, Matrix M){
 Matrix dot(Matrix A, Matrix B);
 Matrix scalar(Matrix A, float scalar);
 Matrix add(Matrix A, Matrix B);
+
+void changeZeros(Matrix M){
+    //Change -0.00 to 0.00
+    for (int row_index = 0; row_index < M.rows; row_index++){
+        for (int column_index = 0; column_index < M.columns; column_index++){
+            if(M.matrix[row_index][column_index] == -0){
+                M.matrix[row_index][column_index] = 0;
+            }
+        }
+    }
+}
 
 Matrix dot(Matrix A, Matrix B){
     if(A.columns != B.rows){
@@ -420,7 +471,7 @@ Matrix dot(Matrix A, Matrix B){
             newMatrix.matrix[row_index][column_index] = value;
         }
     }
-
+    changeZeros(newMatrix);
     return newMatrix;
 }
 
@@ -437,7 +488,7 @@ Matrix add(Matrix A, Matrix B){
             newMatrix.matrix[row_index][column_index] = A.matrix[row_index][column_index] + B.matrix[row_index][column_index];
         }
     }
-
+    changeZeros(newMatrix);
     return newMatrix;
 }
 
@@ -449,6 +500,7 @@ Matrix scalar(Matrix A, float scalar){
             newMatrix.matrix[row_index][column_index] = A.matrix[row_index][column_index]  * scalar;
         }
     }
+    changeZeros(newMatrix);
     return newMatrix;
 }
 
@@ -554,6 +606,6 @@ Matrix reducedRowEchelonForm(Matrix M){
             }
         }
     }
-
+    changeZeros(reducedMatrix);
     return reducedMatrix;
 }

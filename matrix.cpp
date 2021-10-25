@@ -32,8 +32,7 @@ class Matrix{
 
         Matrix operator +(Matrix secondMatrix){
             if(columns != secondMatrix.columns || rows != secondMatrix.rows){
-                printf("A.shape must match B.shape\n");
-                throw("Logic");
+                throw std::invalid_argument("A.shape must match B.shape\n");
             }
             Matrix newMatrix(rows, columns);
             for (int row_index = 0; row_index < rows; row_index++){
@@ -47,9 +46,7 @@ class Matrix{
 
         Matrix operator -(Matrix secondMatrix){
             if(columns != secondMatrix.columns || rows != secondMatrix.rows){
-                printf("A.shape must match B.shape\n");
-                throw("Logic");
-            }
+                throw std::invalid_argument("A.shape must match B.shape\n");            }
             Matrix newMatrix(rows, columns);
             for (int row_index = 0; row_index < rows; row_index++){
                 for (int column_index = 0; column_index < columns; column_index++){
@@ -73,8 +70,7 @@ class Matrix{
 
         Matrix operator / (float scalar){
             if (distance(scalar, 0) < PRECISION){
-                printf("Can't Divide By Zero.\n");
-                throw;
+                throw std::invalid_argument("Can't Divide By Zero.\n");
             }
             Matrix newMatrix(rows, columns);
             for (int row_index = 0; row_index < rows; row_index++){
@@ -97,8 +93,7 @@ class Matrix{
 
         void operator /= (float scalar){
             if (distance(scalar, 0) < PRECISION){
-                printf("Can't Divide By Zero.\n");
-                throw;
+                throw std::invalid_argument("Can't Divide By Zero.\n");
             }
             for (int row_index = 0; row_index < rows; row_index++){
                 for (int column_index = 0; column_index < columns; column_index++){
@@ -110,8 +105,7 @@ class Matrix{
 
         void operator += (Matrix leftMatrix){
             if(columns != leftMatrix.columns || rows != leftMatrix.rows){
-                printf("Matrices Shapes Must Be Equal.\n");
-                throw("Logic");
+                throw std::invalid_argument("Matrices Shapes Must Be Equal.\n");
             }
 
             //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
@@ -125,8 +119,7 @@ class Matrix{
 
         void operator -= (Matrix leftMatrix){
             if(columns != leftMatrix.columns || rows != leftMatrix.rows){
-                printf("Matrices Shapes Must Be Equal.\n");
-                throw("Logic");
+                throw std::invalid_argument("Matrices Shapes Must Be Equal.\n");
             }
 
             //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
@@ -140,8 +133,7 @@ class Matrix{
 
         Matrix operator*(Matrix leftMatrix){
             if(columns != leftMatrix.rows){
-                printf("A.columns Must Be Equal To B.rows.\n");
-                throw("Logic");
+                throw std::invalid_argument("A.columns Must Be Equal To B.rows.\n");
             }
 
             Matrix newMatrix(rows, leftMatrix.columns);
@@ -233,8 +225,7 @@ class Matrix{
 
         void add_(Matrix A){
             if(A.columns != columns || A.rows != rows){
-                printf("A.shape must match B.shape\n");
-                throw("Logic");
+                throw std::invalid_argument("A.shape must match B.shape\n");
             }
 
             //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
@@ -337,8 +328,7 @@ class Matrix{
 
         float det(){
             if(columns != rows){
-                printf("Matrix must be square to calculate determinant.\n");
-                throw;
+                throw std::invalid_argument("Matrix must be square to calculate determinant.\n");
             }
             float result = det_rec(matrix, rows);
             return result;
@@ -390,7 +380,6 @@ class Matrix{
                 leading_entry_column_index = chosen_column;
                 reducedMatrix.swap_rows(chosen_row, leading_entry_row_index);
                 float scalar_to_norm_row = 1 / reducedMatrix.matrix[leading_entry_row_index][leading_entry_column_index];
-                //printf("SHOULDCHANGGERE\n");
                 reducedMatrix.scalar_row(leading_entry_row_index, scalar_to_norm_row);
 
                 for (int row_below_index = leading_entry_row_index + 1; row_below_index < reducedMatrix.rows; row_below_index++){
@@ -448,7 +437,6 @@ class Matrix{
                 leading_entry_column_index = chosen_column;
                 swap_rows(chosen_row, leading_entry_row_index);
                 float scalar_to_norm_row = 1 / matrix[leading_entry_row_index][leading_entry_column_index];
-                //printf("SHOULDCHANGGERE\n");
                 scalar_row(leading_entry_row_index, scalar_to_norm_row);
 
                 for (int row_below_index = leading_entry_row_index + 1; row_below_index < rows; row_below_index++){
@@ -481,13 +469,11 @@ class Matrix{
 
         Matrix inverse(){
             if(columns != rows){
-                printf("Matrix must be square to have inverse.\n");
-                throw;
+                throw std::invalid_argument("Matrix must be square to have inverse.\n");
             }
 
             if (distance(det(), 0) < PRECISION){
-                printf("Singuar matrix does not have an inverse.\n");
-                throw;
+                throw std::invalid_argument("Singuar matrix does not have an inverse.\n");
             }
 
             Matrix inverseMatrix = copyMatrix();
@@ -562,8 +548,7 @@ class Matrix{
 
         void joinRight_(Matrix rightMatrix){
             if (rows != rightMatrix.rows){
-                printf("Rows must be equal in order to join.");
-                throw;
+                throw std::invalid_argument("Rows must be equal in order to join.\n");
             }
             int new_columns = columns + rightMatrix.columns;
             for (int row_index = 0; row_index < rows; row_index++){
@@ -577,7 +562,7 @@ class Matrix{
 
         void unionBelow(Matrix bottomMatrix){
             if (columns != bottomMatrix.columns){
-                printf("Columns must be equal in order to union.");
+                throw std::invalid_argument("Columns must be equal in order to union.\n");
                 throw;
             }
             int new_rows = rows + bottomMatrix.rows;
@@ -593,8 +578,7 @@ class Matrix{
 
         Matrix subMatrix(int start_row_index = 0, int end_row_index = 0, int start_column_index = 0, int end_column_index = 0){
             if(start_row_index < 0 || start_column_index < 0 || start_row_index > end_row_index || start_column_index > end_column_index || end_row_index > rows|| end_column_index > columns){
-                printf("Invalid indices.\n");
-                throw;
+                throw std::invalid_argument("Invalid Indices.\n");
             }
             int subMatrix_rows = end_row_index - start_row_index;
             int subMatrix_columns = end_column_index - start_column_index;
@@ -628,8 +612,7 @@ Matrix add(Matrix A, Matrix B);
 
 Matrix unionMatrices(Matrix upperMatrix, Matrix lowerMatrix){
     if(upperMatrix.columns != lowerMatrix.columns){
-        printf("Columns of matrices must match.\n");
-        throw;
+        throw std::invalid_argument("Columns of matrices must match.\n");
     }
     Matrix unionMatrix(upperMatrix.rows + lowerMatrix.rows, upperMatrix.columns);
     for (int column_index = 0; column_index < upperMatrix.columns; column_index++){
@@ -645,8 +628,7 @@ Matrix unionMatrices(Matrix upperMatrix, Matrix lowerMatrix){
 
 Matrix joinMatrices(Matrix leftMatrix, Matrix rightMatrix){
     if(leftMatrix.rows != rightMatrix.rows){
-        printf("Rows of matrices must match.\n");
-        throw;
+        throw std::invalid_argument("Rows of matrices must match.\n");
     }
     Matrix joinMatrix(leftMatrix.rows, leftMatrix.columns  + rightMatrix.columns);
     for (int row_index = 0; row_index < leftMatrix.rows; row_index++){
@@ -673,8 +655,7 @@ void changeZeros(Matrix M){
 
 Matrix dot(Matrix A, Matrix B){
     if(A.columns != B.rows){
-        printf("A.columns Must Be Equal To B.rows.\n");
-        throw("Logic");
+        throw std::invalid_argument("A.columns Must Be Equal To B.rows.\n");
     }
 
     Matrix newMatrix(A.rows, B.columns);
@@ -694,8 +675,7 @@ Matrix dot(Matrix A, Matrix B){
 
 Matrix add(Matrix A, Matrix B){
     if(A.columns != B.columns || A.rows != B.rows){
-        printf("A.shape must match B.shape\n");
-        throw("Logic");
+        throw std::invalid_argument("A.shape must match B.shape\n");
     }
 
     Matrix newMatrix(A.rows, A.columns);
@@ -786,7 +766,6 @@ Matrix reducedRowEchelonForm(Matrix M){
         leading_entry_column_index = chosen_column;
         reducedMatrix.swap_rows(chosen_row, leading_entry_row_index);
         float scalar_to_norm_row = 1 / reducedMatrix.matrix[leading_entry_row_index][leading_entry_column_index];
-        //printf("SHOULDCHANGGERE\n");
         reducedMatrix.scalar_row(leading_entry_row_index, scalar_to_norm_row);
 
         for (int row_below_index = leading_entry_row_index + 1; row_below_index < reducedMatrix.rows; row_below_index++){

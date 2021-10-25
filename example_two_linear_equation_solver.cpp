@@ -22,15 +22,25 @@ int main(){
     M = M_arr;
     S = S_arr;
     Matrix U = joinMatrices(M, S);
-    printf("The Solution To The Following System Of Equations:\n");
-    U.printMatrix();
-    U.reducedRowEchelonForm_();
-    printf("Is:\n");
-    Matrix X = U.subMatrix(0, 4, 4, 5);
-    X.printMatrix();
-
+    int r_M = M.rank();
+    int r_U = U.rank();
+    if(r_U > r_M){
+        printf("There Is No Solution.\n");
+    }
+    else if (r_U == r_M && r_U == U.rows){
+        printf("The Solution To The Following System Of Equations:\n");
+        U.printMatrix();
+        U.reducedRowEchelonForm_();
+        printf("Is:\n");
+        Matrix X = U.subMatrix(0, 4, 4, 5);
+        X.printMatrix();
+        X.freeMatrix_();
+    }
+    else {
+        printf("There Are Infinite Solutions:\n");
+        U.printMatrix();
+    }
     M.freeMatrix_();
     S.freeMatrix_();
     U.freeMatrix_();
-    X.freeMatrix_();
 }

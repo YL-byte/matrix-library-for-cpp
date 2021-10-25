@@ -361,14 +361,6 @@ class Matrix{
                 }
             }
 
-            //Change -0.00 to 0.00
-            for (int row_index = 0; row_index < reducedMatrix.rows; row_index++){
-                for (int column_index = 0; column_index < reducedMatrix.columns; column_index++){
-                    if(reducedMatrix.matrix[row_index][column_index] == -0){
-                        reducedMatrix.matrix[row_index][column_index] = 0;
-                    }
-                }
-            }
             changeZeros(reducedMatrix);
             return reducedMatrix;
         }
@@ -511,6 +503,37 @@ class Matrix{
             }
         }
 
+        void joinRight_(Matrix rightMatrix){
+            if (rows != rightMatrix.rows){
+                printf("Rows must be equal in order to join.");
+                throw;
+            }
+            int new_columns = columns + rightMatrix.columns;
+            for (int row_index = 0; row_index < rows; row_index++){
+                matrix[row_index] = (float *)realloc(matrix[row_index], sizeof(float) * new_columns);
+                for (int column_index = 0; column_index < rightMatrix.columns; column_index++){
+                    matrix[row_index][column_index + columns] = rightMatrix.matrix[row_index][column_index];
+                }
+            }
+            columns = new_columns;
+        }
+
+        void unionBelow(Matrix bottomMatrix){
+            if (columns != bottomMatrix.columns){
+                printf("Columns must be equal in order to union.");
+                throw;
+            }
+            int new_rows = rows + bottomMatrix.rows;
+            matrix = (float **)realloc(matrix, sizeof(float *) * new_rows);
+            for (int row_index = rows; row_index < new_rows; row_index++){
+                matrix[row_index] = (float *)malloc(sizeof(float) * columns);
+                for (int column_index = 0; column_index < columns; column_index++){
+                    matrix[row_index][column_index] = bottomMatrix.matrix[row_index - rows][column_index];
+                }
+            }
+            rows = new_rows;
+        }
+
 };
 
 //Overloading existing types with matrix type
@@ -529,6 +552,40 @@ Matrix operator *(float scalar, Matrix M){
 Matrix dot(Matrix A, Matrix B);
 Matrix scalar(Matrix A, float scalar);
 Matrix add(Matrix A, Matrix B);
+
+Matrix unionMatrices(Matrix upperMatrix, Matrix lowerMatrix){
+    if(upperMatrix.columns != lowerMatrix.columns){
+        printf("Columns of matrices must match.\n");
+        throw;
+    }
+    Matrix unionMatrix(upperMatrix.rows + lowerMatrix.rows, upperMatrix.columns);
+    for (int column_index = 0; column_index < upperMatrix.columns; column_index++){
+        for (int row_index = 0; row_index  < upperMatrix.rows; row_index ++){
+            unionMatrix.matrix[row_index][column_index] = upperMatrix.matrix[row_index][column_index];
+        }
+        for (int row_index = 0; row_index  < upperMatrix.rows; row_index ++){
+            unionMatrix.matrix[upperMatrix.rows + row_index][column_index] = lowerMatrix.matrix[row_index][column_index];
+        }
+    }
+    return unionMatrix;
+}
+
+Matrix joinMatrices(Matrix leftMatrix, Matrix rightMatrix){
+    if(leftMatrix.rows != rightMatrix.rows){
+        printf("Rows of matrices must match.\n");
+        throw;
+    }
+    Matrix joinMatrix(leftMatrix.rows, leftMatrix.columns  + rightMatrix.columns);
+    for (int row_index = 0; row_index < leftMatrix.rows; row_index++){
+        for (int column_index = 0; column_index < leftMatrix.columns; column_index++){
+            joinMatrix.matrix[row_index][column_index] = leftMatrix.matrix[row_index][column_index];
+        }
+        for (int column_index = 0; column_index < rightMatrix.columns; column_index++){
+            joinMatrix.matrix[row_index][leftMatrix.columns + column_index] = rightMatrix.matrix[row_index][column_index];
+        }
+    }
+    return joinMatrix;
+}
 
 void changeZeros(Matrix M){
     //Change -0.00 to 0.00
@@ -685,14 +742,6 @@ Matrix reducedRowEchelonForm(Matrix M){
         }
     }
 
-    //Change -0.00 to 0.00
-    for (int row_index = 0; row_index < reducedMatrix.rows; row_index++){
-        for (int column_index = 0; column_index < reducedMatrix.columns; column_index++){
-            if(reducedMatrix.matrix[row_index][column_index] == -0){
-                reducedMatrix.matrix[row_index][column_index] = 0;
-            }
-        }
-    }
     changeZeros(reducedMatrix);
     return reducedMatrix;
 }

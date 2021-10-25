@@ -49,9 +49,17 @@ int main(){
     Matrix S = B + B_reduced;
     printf("The sum of both matrices is:\n");
     S.printMatrix();
+    printf("The union of both matrices is:\n");
+    Matrix U = unionMatrices(B, B_reduced);
+    U.printMatrix();
+    printf("The join between the matrices is:\n");
+    Matrix J = joinMatrices(B, B_reduced);
+    J.printMatrix();
 
     B.freeMatrix_();
     B_reduced.freeMatrix_();
     S.freeMatrix_();
+    U.freeMatrix_();
+    J.freeMatrix_();
 
 }

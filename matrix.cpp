@@ -41,7 +41,7 @@ class Matrix{
             return newMatrix;
         }
 
-        Matrix operator*(float scalar){
+        Matrix operator * (float scalar){
             Matrix newMatrix(rows, columns);
             for (int row_index = 0; row_index < rows; row_index++){
                 for (int column_index = 0; column_index < columns; column_index++){
@@ -49,6 +49,14 @@ class Matrix{
                 }
             }
             return newMatrix;
+        }
+
+        void operator *= (float scalar){
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    matrix[row_index][column_index] *= scalar;
+                }
+            }
         }
 
         Matrix operator*(Matrix leftMatrix){
@@ -72,12 +80,26 @@ class Matrix{
             return newMatrix;
         }
 
-        void operator=(float arr[]){
+        void operator = (float arr[]){
             for (int i = 0; i < columns * rows; i++){
                 int column_index = i % columns;
                 int row_index = i / columns;
                 matrix[row_index][column_index] = arr[i];
             }
+        }
+
+        bool operator == (Matrix leftMatrix){
+            if (rows != leftMatrix.rows || columns != leftMatrix.columns){
+                return false;
+            }
+             for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    if (matrix[row_index][column_index] != leftMatrix.matrix[row_index][column_index]){
+                        return false;
+                    }
+                }
+             }
+            return true;
         }
 
         Matrix(int aRows, int aColumns){
@@ -364,6 +386,17 @@ class Matrix{
         }
 
 };
+
+//Overloading existing types with matrix type
+Matrix operator *(float scalar, Matrix M){
+    Matrix newMatrix(M.rows, M.columns);
+    for (int row_index = 0; row_index < M.rows; row_index++){
+        for (int column_index = 0; column_index < M.columns; column_index++){
+            newMatrix.matrix[row_index][column_index] = M.matrix[row_index][column_index] * scalar;
+        }
+    }
+    return newMatrix;
+}
 
 //Matrix Function declaration - Part 2
 Matrix dot(Matrix A, Matrix B);

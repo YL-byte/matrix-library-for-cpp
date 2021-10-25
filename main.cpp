@@ -24,7 +24,7 @@ int main(){
     A_INV.printMatrix();
     printf("The Transpose of the matrix is:\n");
     A_T.printMatrix();
-    printf("The dot product of the matrix with it's inverse is:\n");
+    printf("The dot product of the matrix with its inverse is:\n");
     I.printMatrix();
 
     A.freeMatrix_();

@@ -219,7 +219,7 @@ class Matrix{
             //Change -0.00 to 0.00
             for (int row_index = 0; row_index < rows; row_index++){
                 for (int column_index = 0; column_index < columns; column_index++){
-                    if(matrix[row_index][column_index] == -0){
+                    if(distance(matrix[row_index][column_index], 0) < PRECISION){
                         matrix[row_index][column_index] = 0;
                     }
                 }
@@ -284,6 +284,93 @@ class Matrix{
             }
             float result = det_rec(matrix, rows);
             return result;
+        }
+
+        int rank(){
+            Matrix reducedMatrix = reducedRowEchelonForm();
+            int r = 0;
+            for (int row_index = 0; row_index < rows; row_index++){
+                bool is_row_of_zeros = true;
+                for(int column_index = 0; column_index < columns; column_index++){
+                    if(distance(reducedMatrix.matrix[row_index][column_index], 0) > PRECISION){
+                        is_row_of_zeros = false;
+                    }
+                }
+                //The rank is the number of non-zero rows
+                if(is_row_of_zeros == true){
+                    return r;
+                }
+                r++;
+            }
+            reducedMatrix.freeMatrix_();
+            return r;
+        }
+
+        Matrix reducedRowEchelonForm(){
+            Matrix reducedMatrix = copyMatrix();
+            int leading_entry_row_index = 0; //What Row are we at
+            int leading_entry_column_index = 0; //What Column are we at
+
+            while (leading_entry_column_index < reducedMatrix.columns && leading_entry_row_index < reducedMatrix.rows){
+                int chosen_row = -1, chosen_column = -1;
+                for (int row_index = leading_entry_row_index; row_index < reducedMatrix.rows; row_index++){
+                    for (int column_index = leading_entry_column_index; column_index < reducedMatrix.columns; column_index++){
+                        if(distance(reducedMatrix.matrix[row_index][column_index], 0) > PRECISION){
+                            if(chosen_row == -1 || column_index < chosen_column){
+                                chosen_row = row_index;
+                                chosen_column = column_index;
+                            }
+                        }
+                    }
+                }
+
+                //It means we are done because all rows below are zeros
+                if(chosen_row == -1){
+                    break;
+                }
+
+                leading_entry_column_index = chosen_column;
+                reducedMatrix.swap_rows(chosen_row, leading_entry_row_index);
+                float scalar_to_norm_row = 1 / reducedMatrix.matrix[leading_entry_row_index][leading_entry_column_index];
+                //printf("SHOULDCHANGGERE\n");
+                reducedMatrix.scalar_row(leading_entry_row_index, scalar_to_norm_row);
+
+                for (int row_below_index = leading_entry_row_index + 1; row_below_index < reducedMatrix.rows; row_below_index++){
+                    //If it equals zero we don't need to do anything
+                    if (reducedMatrix.matrix[row_below_index][leading_entry_column_index] != 0){
+                        float scalar_to_norm_row = -1 / reducedMatrix.matrix[row_below_index][leading_entry_column_index];
+                        reducedMatrix.scalar_row(row_below_index, scalar_to_norm_row);
+                        reducedMatrix.add_rows(row_below_index, leading_entry_row_index);
+                    }
+                }
+                leading_entry_row_index++;
+            }
+            //Start making all entries above the leading entry to 0
+            for (int row_index = reducedMatrix.rows - 1; row_index >= 0; row_index--){
+                int leading_entry_column = 0;
+                while (distance(reducedMatrix.matrix[row_index][leading_entry_column], 0) < PRECISION && leading_entry_column < reducedMatrix.columns){
+                    leading_entry_column++;
+                }
+                if(leading_entry_column < reducedMatrix.columns){
+                    for (int above_row_index = row_index - 1; above_row_index >= 0; above_row_index--){
+                        if(reducedMatrix.matrix[above_row_index][leading_entry_column] != 0){
+                            float scalar_to_norm_row = -1 * reducedMatrix.matrix[above_row_index][leading_entry_column];
+                            reducedMatrix.add_rows(above_row_index, row_index, scalar_to_norm_row);
+                        }
+                    }
+                }
+            }
+
+            //Change -0.00 to 0.00
+            for (int row_index = 0; row_index < reducedMatrix.rows; row_index++){
+                for (int column_index = 0; column_index < reducedMatrix.columns; column_index++){
+                    if(reducedMatrix.matrix[row_index][column_index] == -0){
+                        reducedMatrix.matrix[row_index][column_index] = 0;
+                    }
+                }
+            }
+            changeZeros(reducedMatrix);
+            return reducedMatrix;
         }
 
         void reducedRowEchelonForm_(){
@@ -447,7 +534,7 @@ void changeZeros(Matrix M){
     //Change -0.00 to 0.00
     for (int row_index = 0; row_index < M.rows; row_index++){
         for (int column_index = 0; column_index < M.columns; column_index++){
-            if(M.matrix[row_index][column_index] == -0){
+            if(distance (M.matrix[row_index][column_index], 0) < PRECISION){
                 M.matrix[row_index][column_index] = 0;
             }
         }

@@ -534,6 +534,22 @@ class Matrix{
             rows = new_rows;
         }
 
+        Matrix subMatrix(int start_row_index = 0, int end_row_index = 0, int start_column_index = 0, int end_column_index = 0){
+            if(start_row_index < 0 || start_column_index < 0 || start_row_index > end_row_index || start_column_index > end_column_index || end_row_index > rows|| end_column_index > columns){
+                printf("Invalid indices.\n");
+                throw;
+            }
+            int subMatrix_rows = end_row_index - start_row_index;
+            int subMatrix_columns = end_column_index - start_column_index;
+            Matrix subMatrix(subMatrix_rows, subMatrix_columns);
+            for (int row_index = 0; row_index < subMatrix_rows; row_index++){
+                for (int column_index = 0; column_index < subMatrix_columns; column_index++){
+                    subMatrix.matrix[row_index][column_index] = matrix[row_index + start_row_index][column_index + start_column_index];
+                }
+            }
+            return subMatrix;
+        }
+
 };
 
 //Overloading existing types with matrix type

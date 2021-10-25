@@ -45,6 +45,21 @@ class Matrix{
             return newMatrix;
         }
 
+        Matrix operator -(Matrix secondMatrix){
+            if(columns != secondMatrix.columns || rows != secondMatrix.rows){
+                printf("A.shape must match B.shape\n");
+                throw("Logic");
+            }
+            Matrix newMatrix(rows, columns);
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                        newMatrix.matrix[row_index][column_index] = matrix[row_index][column_index] - secondMatrix.matrix[row_index][column_index];
+                }
+            }
+            changeZeros(newMatrix);
+            return newMatrix;
+        }
+
         Matrix operator * (float scalar){
             Matrix newMatrix(rows, columns);
             for (int row_index = 0; row_index < rows; row_index++){
@@ -56,7 +71,35 @@ class Matrix{
             return newMatrix;
         }
 
+        Matrix operator / (float scalar){
+            if (distance(scalar, 0) < PRECISION){
+                printf("Can't Divide By Zero.\n");
+                throw;
+            }
+            Matrix newMatrix(rows, columns);
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    newMatrix.matrix[row_index][column_index] = matrix[row_index][column_index] / scalar;
+                }
+            }
+            changeZeros(newMatrix);
+            return newMatrix;
+        }
+
         void operator *= (float scalar){
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    matrix[row_index][column_index] *= scalar;
+                }
+            }
+            changeZeros_();
+        }
+
+        void operator /= (float scalar){
+            if (distance(scalar, 0) < PRECISION){
+                printf("Can't Divide By Zero.\n");
+                throw;
+            }
             for (int row_index = 0; row_index < rows; row_index++){
                 for (int column_index = 0; column_index < columns; column_index++){
                     matrix[row_index][column_index] *= scalar;
@@ -75,6 +118,21 @@ class Matrix{
             for (int row_index = 0; row_index < rows; row_index++){
                 for (int column_index = 0; column_index < leftMatrix.columns; column_index++){
                     matrix[row_index][column_index] += leftMatrix.matrix[row_index][column_index];
+                }
+            }
+            changeZeros_();
+        }
+
+        void operator -= (Matrix leftMatrix){
+            if(columns != leftMatrix.columns || rows != leftMatrix.rows){
+                printf("Matrices Shapes Must Be Equal.\n");
+                throw("Logic");
+            }
+
+            //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < leftMatrix.columns; column_index++){
+                    matrix[row_index][column_index] -= leftMatrix.matrix[row_index][column_index];
                 }
             }
             changeZeros_();
@@ -460,7 +518,6 @@ class Matrix{
             inverseMatrix.columns /= 2;
             changeZeros(inverseMatrix);
             return inverseMatrix;
-
         }
 
         void swap_rows(int row_a, int row_b){

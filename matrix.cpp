@@ -91,6 +91,23 @@ class Matrix{
             changeZeros_();
         }
 
+        void operator *= (Matrix rightMatrix){
+            if(columns != rightMatrix.rows){
+                throw std::invalid_argument("A.columns Must Be Equal To B.rows.\n");
+            }
+            //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < rightMatrix.columns; column_index++){
+                    float value = 0;
+                    for (int i = 0; i < columns; i++){
+                        value += matrix[row_index][i] * rightMatrix.matrix[i][column_index];
+                    }
+                    matrix[row_index][column_index] = value;
+                }
+            }
+            changeZeros_();
+        }
+
         void operator /= (float scalar){
             if (distance(scalar, 0) < PRECISION){
                 throw std::invalid_argument("Can't Divide By Zero.\n");
@@ -131,18 +148,18 @@ class Matrix{
             changeZeros_();
         }
 
-        Matrix operator*(Matrix leftMatrix){
-            if(columns != leftMatrix.rows){
+        Matrix operator*(Matrix rightMatrix){
+            if(columns != rightMatrix.rows){
                 throw std::invalid_argument("A.columns Must Be Equal To B.rows.\n");
             }
 
-            Matrix newMatrix(rows, leftMatrix.columns);
+            Matrix newMatrix(rows, rightMatrix.columns);
             //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
             for (int row_index = 0; row_index < rows; row_index++){
-                for (int column_index = 0; column_index < leftMatrix.columns; column_index++){
+                for (int column_index = 0; column_index < rightMatrix.columns; column_index++){
                     float value = 0;
                     for (int i = 0; i < columns; i++){
-                        value += matrix[row_index][i] * leftMatrix.matrix[i][column_index];
+                        value += matrix[row_index][i] * rightMatrix.matrix[i][column_index];
                     }
                     newMatrix.matrix[row_index][column_index] = value;
                 }
@@ -314,6 +331,61 @@ class Matrix{
              }
              free(current_matrix);
              changeZeros_();
+        }
+
+        void reshape_(int new_rows, int new_columns){
+             if (new_rows * new_columns != rows * columns){
+                throw std::invalid_argument("new_rows * new_columns Must Equal rows * columns\n");
+             }
+             float *temp_matrix = (float *)malloc(sizeof(float) * rows * columns);
+              int i = 0;
+             //Create Copy Of Current Matrix and free current matrix
+             for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    temp_matrix[i] = matrix[row_index][column_index];
+                    i++;
+                }
+                free(matrix[row_index]);
+             }
+
+             matrix = (float **)realloc(matrix, sizeof(float *) * new_rows);
+             i = 0;
+             for (int row_index = 0; row_index < new_rows; row_index++){
+                matrix[row_index] = (float *)malloc(sizeof(float) * new_columns);
+                for (int column_index = 0; column_index < new_columns; column_index++){
+                    matrix[row_index][column_index] = temp_matrix[i];
+                    i++;
+                }
+              }
+              free(temp_matrix);
+              rows = new_rows;
+              columns = new_columns;
+        }
+
+        Matrix reshape(int new_rows, int new_columns){
+             if (new_rows * new_columns != rows * columns){
+                throw std::invalid_argument("new_rows * new_columns Must Equal rows * columns\n");
+             }
+             float *temp_matrix = (float *)malloc(sizeof(float) * rows * columns);
+              int i = 0;
+             //Create Copy Of Current Matrix and free current matrix
+             for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    temp_matrix[i] = matrix[row_index][column_index];
+                    i++;
+                }
+             }
+             Matrix reshapedMatrix(new_rows, new_columns);
+             i = 0;
+             for (int row_index = 0; row_index < new_rows; row_index++){
+                matrix[row_index] = (float *)malloc(sizeof(float) * new_columns);
+                for (int column_index = 0; column_index < new_columns; column_index++){
+                    reshapedMatrix.matrix[row_index][column_index] = temp_matrix[i];
+                    i++;
+                }
+              }
+              free(temp_matrix);
+              return reshapedMatrix;
         }
 
         Matrix copyMatrix(){

@@ -30,6 +30,16 @@ class Matrix{
         Matrix *all_matrices = NULL;
         int number_of_matrices = 0;
 
+        Matrix(int aRows = 0, int aColumns = 0){
+            rows = aRows;
+            columns = aColumns;
+            matrix = (float**) malloc(sizeof(float*) * rows);
+            for (int row_index = 0; row_index < rows; row_index++){
+                matrix[row_index] = (float*) malloc(sizeof(float) * columns);
+            }
+            number_of_matrices++;
+        }
+
         Matrix operator +(Matrix secondMatrix){
             if(columns != secondMatrix.columns || rows != secondMatrix.rows){
                 throw std::invalid_argument("A.shape must match B.shape\n");
@@ -198,17 +208,6 @@ class Matrix{
                 }
             }
             inverMatrix.freeMatrix_();
-        }
-
-
-        Matrix(int aRows, int aColumns){
-            rows = aRows;
-            columns = aColumns;
-            matrix = (float**) malloc(sizeof(float*) * rows);
-            for (int row_index = 0; row_index < rows; row_index++){
-                matrix[row_index] = (float*) malloc(sizeof(float) * columns);
-            }
-            number_of_matrices++;
         }
 
         void populateWithRisingIntegers_(float starting_value = 0){

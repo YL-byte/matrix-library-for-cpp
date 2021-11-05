@@ -648,8 +648,29 @@ class Matrix{
         }
 
         Matrix subMatrix(int start_row_index = 0, int end_row_index = 0, int start_column_index = 0, int end_column_index = 0){
-            if(start_row_index < 0 || start_column_index < 0 || start_row_index > end_row_index || start_column_index > end_column_index || end_row_index > rows|| end_column_index > columns){
-                throw std::invalid_argument("Invalid Indices.\n");
+            if(start_row_index < 0){
+                printf("Invalid Indices! start_row_index (%d) < 0\n", start_row_index);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if(start_column_index < 0 ){
+                printf("Invalid Indices! start_column_index (%d) < 0\n", start_column_index);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if(start_row_index > end_row_index){
+                printf("Invalid Indices! start_row_index(%d) > end_row_index(%d)\n", start_row_index, end_row_index);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if(start_column_index > end_column_index){
+                printf("Invalid Indices! start_column_index(%d) > end_column_index(%d)\n", start_column_index, end_column_index);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if(end_row_index - start_row_index > rows){
+                printf("Invalid Indices! end_row_index - start_row_index(%d) > rows(%d)\n", end_row_index - start_row_index, rows);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if( end_column_index - start_column_index > columns){
+                printf("Invalid Indices! end_column_index- start_column_index(%d) > columns(%d) \n", end_column_index - start_column_index, columns);
+                throw std::invalid_argument("Invalid Indices!");
             }
             int subMatrix_rows = end_row_index - start_row_index;
             int subMatrix_columns = end_column_index - start_column_index;
@@ -680,6 +701,7 @@ Matrix operator *(float scalar, Matrix M){
 Matrix dot(Matrix A, Matrix B);
 Matrix scalar(Matrix A, float scalar);
 Matrix add(Matrix A, Matrix B);
+Matrix convolution (Matrix sourceMatrix, Matrix convolutionMatrix, int stride_rows, int stride_columns, bool normalize);
 
 Matrix unionMatrices(Matrix upperMatrix, Matrix lowerMatrix){
     if(upperMatrix.columns != lowerMatrix.columns){
@@ -867,4 +889,40 @@ Matrix reducedRowEchelonForm(Matrix M){
 
     changeZeros(reducedMatrix);
     return reducedMatrix;
+}
+
+Matrix convolution (Matrix sourceMatrix, Matrix convolutionMatrix, int stride_rows = 1, int stride_columns = 1, bool normalize = true){
+    if (sourceMatrix.rows < convolutionMatrix.rows || sourceMatrix.columns < convolutionMatrix.columns){
+        throw("convolutionMatrix must be smaller or equal in size with sourceMatrix.\n");
+    }
+    Matrix resultMatrix(sourceMatrix.rows / stride_rows, sourceMatrix.columns / stride_columns);
+    resultMatrix.populateWithValue_(0);
+    resultMatrix.printMatrix();
+    for (int result_row_index = 0; result_row_index < resultMatrix.rows; result_row_index++){
+        for (int result_column_index = 0; result_column_index < resultMatrix.columns; result_column_index++){
+            //Calculate the bitwise sum and divide by the number of elements.
+            int divide = 0; //How much elements did we sum.
+            for (int source_row_offset = -1 * convolutionMatrix.rows / 2; source_row_offset < convolutionMatrix.rows / 2 + convolutionMatrix.rows % 2; source_row_offset++){
+                int source_row_index = result_row_index * stride_rows + source_row_offset;
+                int convolution_row_index = source_row_offset + convolutionMatrix.rows / 2;
+                if(source_row_index >= 0 && source_row_index < sourceMatrix.rows){
+                    for (int source_column_offset = -1 * convolutionMatrix.columns / 2; source_column_offset < convolutionMatrix.columns / 2 + convolutionMatrix.columns % 2; source_column_offset++){
+                        int source_column_index = result_column_index * stride_columns + source_column_offset;
+                        int convolution_column_index = source_column_offset + convolutionMatrix.columns / 2;
+                        if (source_column_index >= 0 && source_column_index < sourceMatrix.columns){
+                            printf("Source: %d, %d | Convolution: %d, %d | Result: %d, %d\n", source_row_index, source_column_index, convolution_row_index, convolution_column_index, result_row_index, result_column_index);
+                            resultMatrix.matrix[result_row_index][result_column_index] += sourceMatrix.matrix[source_row_index][source_column_index] * convolutionMatrix.matrix[convolution_row_index][convolution_column_index];
+                            divide++;
+                        }
+                    }
+                }
+            }
+            if (normalize && divide != 0){
+                //resultMatrix.matrix[result_row_index][result_column_index] /= divide;
+                printf("Current Result: %f\n", resultMatrix.matrix[result_row_index][result_column_index]);
+
+            }
+        }
+    }
+    return resultMatrix;
 }

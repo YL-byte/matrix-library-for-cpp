@@ -1,13 +1,19 @@
 #include <iostream>
 #include <stdexcept>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctime>
 #define PRECISION 0.000001 //We need to define it so that we can take number in the interval (-PRECISION, PRECISION) as 0
-using namespace std;
 
-//Function declaration - Part 1
-
+//Function declaration
 class Matrix;
 float det_rec(float **matrix, int n);
 void changeZeros(Matrix M);
+Matrix dot(Matrix A, Matrix B);
+Matrix scalar(Matrix A, float scalar);
+Matrix add(Matrix A, Matrix B);
+Matrix convolution (Matrix sourceMatrix, Matrix convolutionMatrix, int stride_rows, int stride_columns, bool normalize);
+using namespace std;
 
 float return_min(float a, float b){
     return (a <= b) * a + (a > b) * b;
@@ -239,6 +245,19 @@ class Matrix{
             }
         }
 
+        void populateWithRandomNumbers_(float min_value = 0, float max_value = 1, int seed = (unsigned) time(0)){
+          if (min_value > max_value){
+            throw std::invalid_argument("min_value can't be larger than max_value\n");
+          }
+          srand(seed);
+          rand();
+            for (int row_index = 0; row_index < rows; row_index++){
+                for(int column_index = 0; column_index < columns; column_index++){
+                    matrix[row_index][column_index] = (float)min_value + rand() * (max_value - min_value) / RAND_MAX;
+                }
+            }
+        }
+
         void add_(Matrix A){
             if(A.columns != columns || A.rows != rows){
                 throw std::invalid_argument("A.shape must match B.shape\n");
@@ -286,6 +305,16 @@ class Matrix{
                 for (int column_index = 0; column_index < columns; column_index++){
                     if(distance(matrix[row_index][column_index], 0) < PRECISION){
                         matrix[row_index][column_index] = 0;
+                    }
+                }
+            }
+        }
+
+        void changeNegatives_(float new_value = 0){
+            for (int row_index = 0; row_index < rows; row_index++){
+                for (int column_index = 0; column_index < columns; column_index++){
+                    if(matrix[row_index][column_index] < 0){
+                        matrix[row_index][column_index] = new_value;
                     }
                 }
             }
@@ -683,6 +712,99 @@ class Matrix{
             return subMatrix;
         }
 
+        void subMatrix_(int start_row_index = 0, int end_row_index = 0, int start_column_index = 0, int end_column_index = 0){
+            if(start_row_index < 0){
+                printf("Invalid Indices! start_row_index (%d) < 0\n", start_row_index);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if(start_column_index < 0 ){
+                printf("Invalid Indices! start_column_index (%d) < 0\n", start_column_index);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if(start_row_index > end_row_index){
+                printf("Invalid Indices! start_row_index(%d) > end_row_index(%d)\n", start_row_index, end_row_index);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if(start_column_index > end_column_index){
+                printf("Invalid Indices! start_column_index(%d) > end_column_index(%d)\n", start_column_index, end_column_index);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if(end_row_index - start_row_index > rows){
+                printf("Invalid Indices! end_row_index - start_row_index(%d) > rows(%d)\n", end_row_index - start_row_index, rows);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            if( end_column_index - start_column_index > columns){
+                printf("Invalid Indices! end_column_index- start_column_index(%d) > columns(%d) \n", end_column_index - start_column_index, columns);
+                throw std::invalid_argument("Invalid Indices!");
+            }
+            int subMatrix_rows = end_row_index - start_row_index;
+            int subMatrix_columns = end_column_index - start_column_index;
+            Matrix subMatrix(subMatrix_rows, subMatrix_columns);
+            for (int row_index = 0; row_index < subMatrix_rows; row_index++){
+                for (int column_index = 0; column_index < subMatrix_columns; column_index++){
+                    matrix[row_index][column_index] = matrix[row_index + start_row_index][column_index + start_column_index];
+                }
+            }
+            rows = subMatrix_rows;
+            columns = subMatrix_columns;
+        }
+
+    Matrix pooling(int pooling_rows = 3, int pooling_columns = 3, int stride_rows = 1, int stride_columns = 1){
+        Matrix resultMatrix(rows / stride_rows, columns / stride_columns);
+        resultMatrix.populateWithValue_(0);
+        for (int result_row_index = 0; result_row_index < resultMatrix.rows; result_row_index++){
+            for (int result_column_index = 0; result_column_index < resultMatrix.columns; result_column_index++){
+                for (int source_row_offset = -1 * pooling_rows / 2; source_row_offset < pooling_rows / 2 + pooling_rows % 2; source_row_offset++){
+                    int source_row_index = result_row_index * stride_rows + source_row_offset;
+                    int convolution_row_index = source_row_offset + pooling_rows / 2;
+                    if(source_row_index >= 0 && source_row_index < rows){
+                        for (int source_column_offset = -1 * pooling_columns / 2; source_column_offset < pooling_columns / 2 + pooling_columns % 2; source_column_offset++){
+                            int source_column_index = result_column_index * stride_columns + source_column_offset;
+                            int convolution_column_index = source_column_offset + pooling_columns / 2;
+                            if (source_column_index >= 0 && source_column_index < columns){
+                                 if (resultMatrix.matrix[result_row_index][result_column_index] < matrix[source_row_index][source_column_index]){
+                                    resultMatrix.matrix[result_row_index][result_column_index] = matrix[source_row_index][source_column_index];
+                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    return resultMatrix;
+    }
+
+    void convolution_(Matrix convolutionMatrix, int stride_rows = 1, int stride_columns = 1, bool normalize = true){
+        Matrix tempMatrix = convolution(*this, convolutionMatrix, stride_rows, stride_columns, normalize);
+        for (int row_index = 0; row_index < rows; row_index++){
+            matrix[row_index] = (float*)realloc(matrix[row_index], sizeof(float) * columns / stride_columns);
+        }
+        matrix = (float**)realloc(matrix, sizeof(float*) * rows / stride_rows);
+        rows /= stride_rows;
+        columns /= stride_columns;
+        for (int row_index = 0; row_index < rows; row_index++){
+            for (int column_index = 0; column_index < columns; column_index++){
+                matrix[row_index][column_index] = tempMatrix.matrix[row_index][column_index];
+            }
+        }
+        tempMatrix.freeMatrix_();
+    }
+
+    void pooling_(int pooling_rows = 3, int pooling_columns = 3, int stride_rows = 1, int stride_columns = 1){
+        Matrix tempMatrix = pooling(pooling_rows, pooling_columns, stride_rows, stride_columns);
+        for (int row_index = 0; row_index < rows; row_index++){
+            matrix[row_index] = (float*)realloc(matrix[row_index], sizeof(float) * columns / stride_columns);
+        }
+        matrix = (float**)realloc(matrix, sizeof(float*) * rows / stride_rows);
+        rows /= stride_rows;
+        columns /= stride_columns;
+        for (int row_index = 0; row_index < rows; row_index++){
+            for (int column_index = 0; column_index < columns; column_index++){
+                matrix[row_index][column_index] = tempMatrix.matrix[row_index][column_index];
+            }
+        }
+        tempMatrix.freeMatrix_();
+    }
 };
 
 //Overloading existing types with matrix type
@@ -696,12 +818,6 @@ Matrix operator *(float scalar, Matrix M){
     changeZeros(newMatrix);
     return newMatrix;
 }
-
-//Matrix Function declaration - Part 2
-Matrix dot(Matrix A, Matrix B);
-Matrix scalar(Matrix A, float scalar);
-Matrix add(Matrix A, Matrix B);
-Matrix convolution (Matrix sourceMatrix, Matrix convolutionMatrix, int stride_rows, int stride_columns, bool normalize);
 
 Matrix unionMatrices(Matrix upperMatrix, Matrix lowerMatrix){
     if(upperMatrix.columns != lowerMatrix.columns){
@@ -897,7 +1013,6 @@ Matrix convolution (Matrix sourceMatrix, Matrix convolutionMatrix, int stride_ro
     }
     Matrix resultMatrix(sourceMatrix.rows / stride_rows, sourceMatrix.columns / stride_columns);
     resultMatrix.populateWithValue_(0);
-    resultMatrix.printMatrix();
     for (int result_row_index = 0; result_row_index < resultMatrix.rows; result_row_index++){
         for (int result_column_index = 0; result_column_index < resultMatrix.columns; result_column_index++){
             //Calculate the bitwise sum and divide by the number of elements.
@@ -910,7 +1025,6 @@ Matrix convolution (Matrix sourceMatrix, Matrix convolutionMatrix, int stride_ro
                         int source_column_index = result_column_index * stride_columns + source_column_offset;
                         int convolution_column_index = source_column_offset + convolutionMatrix.columns / 2;
                         if (source_column_index >= 0 && source_column_index < sourceMatrix.columns){
-                            printf("Source: %d, %d | Convolution: %d, %d | Result: %d, %d\n", source_row_index, source_column_index, convolution_row_index, convolution_column_index, result_row_index, result_column_index);
                             resultMatrix.matrix[result_row_index][result_column_index] += sourceMatrix.matrix[source_row_index][source_column_index] * convolutionMatrix.matrix[convolution_row_index][convolution_column_index];
                             divide++;
                         }
@@ -918,9 +1032,7 @@ Matrix convolution (Matrix sourceMatrix, Matrix convolutionMatrix, int stride_ro
                 }
             }
             if (normalize && divide != 0){
-                //resultMatrix.matrix[result_row_index][result_column_index] /= divide;
-                printf("Current Result: %f\n", resultMatrix.matrix[result_row_index][result_column_index]);
-
+                resultMatrix.matrix[result_row_index][result_column_index] /= divide;
             }
         }
     }

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctime>
-#define DATA_TYPE int
+#define DATA_TYPE float
 using namespace std;
 
 class Matrix{

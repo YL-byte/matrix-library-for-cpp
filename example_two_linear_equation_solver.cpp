@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdexcept>
-#include "matrix.cpp"
+#include "Matrix.h"
 
 int main(){
     Matrix M(4, 4), S(4, 1);

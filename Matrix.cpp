@@ -1,14 +1,14 @@
 #include "Matrix.h"
 
-float Matrix::return_min(float a, float b){
+DATA_TYPE Matrix::return_min(DATA_TYPE a, DATA_TYPE b){
     return (a <= b) * a + (a > b) * b;
 }
 
-float Matrix::return_max(float a, float b){
+DATA_TYPE Matrix::return_max(DATA_TYPE a, DATA_TYPE b){
     return (a >= b) * a + (a < b) * b;
 }
 
-float Matrix::distance(float a, float b){
+DATA_TYPE Matrix::distance(DATA_TYPE a, DATA_TYPE b){
     return (a - b) * (a >= b) + (b - a) * (a < b);
 }
 
@@ -22,7 +22,7 @@ int Matrix::getColumns()
     return this->rows;
 }
 
-float** Matrix::getMatrix()
+DATA_TYPE** Matrix::getMatrix()
 {
     return this->matrix;
 }
@@ -30,9 +30,9 @@ float** Matrix::getMatrix()
 Matrix::Matrix(int aRows, int aColumns){
     rows = aRows;
     columns = aColumns;
-    matrix = (float**) malloc(sizeof(float*) * rows);
+    matrix = (DATA_TYPE**) malloc(sizeof(DATA_TYPE*) * rows);
     for (int row_index = 0; row_index < rows; row_index++){
-        matrix[row_index] = (float*) malloc(sizeof(float) * columns);
+        matrix[row_index] = (DATA_TYPE*) malloc(sizeof(DATA_TYPE) * columns);
     }
 }
 
@@ -63,7 +63,7 @@ Matrix Matrix::operator -(Matrix secondMatrix){
     return newMatrix;
 }
 
-Matrix Matrix::operator * (float scalar){
+Matrix Matrix::operator * (DATA_TYPE scalar){
     Matrix newMatrix(rows, columns);
     for (int row_index = 0; row_index < rows; row_index++){
         for (int column_index = 0; column_index < columns; column_index++){
@@ -74,7 +74,7 @@ Matrix Matrix::operator * (float scalar){
     return newMatrix;
 }
 
-Matrix Matrix::operator / (float scalar){
+Matrix Matrix::operator / (DATA_TYPE scalar){
     if (distance(scalar, 0) < PRECISION){
         throw std::invalid_argument("Can't Divide By Zero.\n");
     }
@@ -88,7 +88,7 @@ Matrix Matrix::operator / (float scalar){
     return newMatrix;
 }
 
-void Matrix::operator *= (float scalar){
+void Matrix::operator *= (DATA_TYPE scalar){
     for (int row_index = 0; row_index < rows; row_index++){
         for (int column_index = 0; column_index < columns; column_index++){
             matrix[row_index][column_index] *= scalar;
@@ -104,7 +104,7 @@ void Matrix::operator *= (Matrix rightMatrix){
     //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
     for (int row_index = 0; row_index < rows; row_index++){
         for (int column_index = 0; column_index < rightMatrix.columns; column_index++){
-            float value = 0;
+            DATA_TYPE value = 0;
             for (int i = 0; i < columns; i++){
                 value += matrix[row_index][i] * rightMatrix.matrix[i][column_index];
             }
@@ -114,7 +114,7 @@ void Matrix::operator *= (Matrix rightMatrix){
     changeZeros_();
 }
 
-void Matrix::operator /= (float scalar){
+void Matrix::operator /= (DATA_TYPE scalar){
     if (distance(scalar, 0) < PRECISION){
         throw std::invalid_argument("Can't Divide By Zero.\n");
     }
@@ -163,7 +163,7 @@ Matrix Matrix::operator*(Matrix rightMatrix){
     //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
     for (int row_index = 0; row_index < rows; row_index++){
         for (int column_index = 0; column_index < rightMatrix.columns; column_index++){
-            float value = 0;
+            DATA_TYPE value = 0;
             for (int i = 0; i < columns; i++){
                 value += matrix[row_index][i] * rightMatrix.matrix[i][column_index];
             }
@@ -174,7 +174,7 @@ Matrix Matrix::operator*(Matrix rightMatrix){
     return newMatrix;
 }
 
-void Matrix::operator = (float arr[]){
+void Matrix::operator = (DATA_TYPE arr[]){
     for (int i = 0; i < columns * rows; i++){
         int column_index = i % columns;
         int row_index = i / columns;
@@ -206,7 +206,7 @@ void Matrix::inverse_(){
     inverMatrix.freeMatrix_();
 }
 
-void Matrix::populateWithRisingIntegers_(float starting_value){
+void Matrix::populateWithRisingIntegers_(DATA_TYPE starting_value){
     for (int row_index = 0; row_index < rows; row_index++){
         for(int column_index = 0; column_index < columns; column_index++){
             matrix[row_index][column_index] = starting_value + row_index * columns + column_index;
@@ -214,7 +214,7 @@ void Matrix::populateWithRisingIntegers_(float starting_value){
     }
 }
 
-void Matrix::populateWithDiagonalValue_(float value){
+void Matrix::populateWithDiagonalValue_(DATA_TYPE value){
     for (int row_index = 0; row_index < rows; row_index++){
         for(int column_index = 0; column_index < columns; column_index++){
             if(row_index == column_index){
@@ -227,7 +227,7 @@ void Matrix::populateWithDiagonalValue_(float value){
     }
 }
 
-void Matrix::populateWithValue_(float value){
+void Matrix::populateWithValue_(DATA_TYPE value){
     for (int row_index = 0; row_index < rows; row_index++){
         for(int column_index = 0; column_index < columns; column_index++){
             matrix[row_index][column_index] = value;
@@ -235,7 +235,7 @@ void Matrix::populateWithValue_(float value){
     }
 }
 
-void Matrix::populateWithRandomNumbers_(float min_value, float max_value, int seed){
+void Matrix::populateWithRandomNumbers_(DATA_TYPE min_value, DATA_TYPE max_value, int seed){
     if (min_value > max_value){
     throw std::invalid_argument("min_value can't be larger than max_value\n");
     }
@@ -243,7 +243,7 @@ void Matrix::populateWithRandomNumbers_(float min_value, float max_value, int se
     rand();
     for (int row_index = 0; row_index < rows; row_index++){
         for(int column_index = 0; column_index < columns; column_index++){
-            matrix[row_index][column_index] = (float)min_value + rand() * (max_value - min_value) / RAND_MAX;
+            matrix[row_index][column_index] = (DATA_TYPE)min_value + rand() * (max_value - min_value) / RAND_MAX;
         }
     }
 }
@@ -262,7 +262,7 @@ void Matrix::add_(Matrix A){
     changeZeros_();
 }
 
-void Matrix::scalar_(float scalar){
+void Matrix::scalar_(DATA_TYPE scalar){
     for (int row_index = 0; row_index < rows; row_index++){
         for (int column_index = 0; column_index < columns; column_index++){
             matrix[row_index][column_index] *= scalar;
@@ -300,7 +300,7 @@ void Matrix::changeZeros_(){
     }
 }
 
-void Matrix::changeNegatives_(float new_value){
+void Matrix::changeNegatives_(DATA_TYPE new_value){
     for (int row_index = 0; row_index < rows; row_index++){
         for (int column_index = 0; column_index < columns; column_index++){
             if(matrix[row_index][column_index] < 0){
@@ -322,10 +322,10 @@ Matrix Matrix::transpose(){
 }
 
 void Matrix::transpose_(){
-        float **current_matrix = (float **)malloc(sizeof(float *) * rows);
+        DATA_TYPE **current_matrix = (DATA_TYPE **)malloc(sizeof(DATA_TYPE *) * rows);
         //Create Copy Of Current Matrix and free current matrix
         for (int row_index = 0; row_index < rows; row_index++){
-        current_matrix[row_index] = (float *)malloc(sizeof(float) * columns);
+        current_matrix[row_index] = (DATA_TYPE *)malloc(sizeof(DATA_TYPE) * columns);
         for (int column_index = 0; column_index < columns; column_index++){
             current_matrix[row_index][column_index] = matrix[row_index][column_index];
         }
@@ -337,9 +337,9 @@ void Matrix::transpose_(){
         rows = columns;
         columns = temp;
 
-        matrix = (float **)realloc(matrix, sizeof(float *) * rows);
+        matrix = (DATA_TYPE **)realloc(matrix, sizeof(DATA_TYPE *) * rows);
         for (int row_index = 0; row_index < rows; row_index++){
-        matrix[row_index] = (float *)malloc(sizeof(float) * columns);
+        matrix[row_index] = (DATA_TYPE *)malloc(sizeof(DATA_TYPE) * columns);
         for (int column_index = 0; column_index < columns; column_index++){
             matrix[row_index][column_index] = current_matrix[column_index][row_index];
         }
@@ -355,7 +355,7 @@ void Matrix::reshape_(int new_rows, int new_columns){
         if (new_rows * new_columns != rows * columns){
         throw std::invalid_argument("new_rows * new_columns Must Equal rows * columns\n");
         }
-        float *temp_matrix = (float *)malloc(sizeof(float) * rows * columns);
+        DATA_TYPE *temp_matrix = (DATA_TYPE *)malloc(sizeof(DATA_TYPE) * rows * columns);
         int i = 0;
         //Create Copy Of Current Matrix and free current matrix
         for (int row_index = 0; row_index < rows; row_index++){
@@ -366,10 +366,10 @@ void Matrix::reshape_(int new_rows, int new_columns){
         free(matrix[row_index]);
         }
 
-        matrix = (float **)realloc(matrix, sizeof(float *) * new_rows);
+        matrix = (DATA_TYPE **)realloc(matrix, sizeof(DATA_TYPE *) * new_rows);
         i = 0;
         for (int row_index = 0; row_index < new_rows; row_index++){
-        matrix[row_index] = (float *)malloc(sizeof(float) * new_columns);
+        matrix[row_index] = (DATA_TYPE *)malloc(sizeof(DATA_TYPE) * new_columns);
         for (int column_index = 0; column_index < new_columns; column_index++){
             matrix[row_index][column_index] = temp_matrix[i];
             i++;
@@ -384,7 +384,7 @@ Matrix Matrix::reshape(int new_rows, int new_columns){
         if (new_rows * new_columns != rows * columns){
         throw std::invalid_argument("new_rows * new_columns Must Equal rows * columns\n");
         }
-        float *temp_matrix = (float *)malloc(sizeof(float) * rows * columns);
+        DATA_TYPE *temp_matrix = (DATA_TYPE *)malloc(sizeof(DATA_TYPE) * rows * columns);
         int i = 0;
         //Create Copy Of Current Matrix and free current matrix
         for (int row_index = 0; row_index < rows; row_index++){
@@ -396,7 +396,7 @@ Matrix Matrix::reshape(int new_rows, int new_columns){
         Matrix reshapedMatrix(new_rows, new_columns);
         i = 0;
         for (int row_index = 0; row_index < new_rows; row_index++){
-        matrix[row_index] = (float *)malloc(sizeof(float) * new_columns);
+        matrix[row_index] = (DATA_TYPE *)malloc(sizeof(DATA_TYPE) * new_columns);
         for (int column_index = 0; column_index < new_columns; column_index++){
             reshapedMatrix.matrix[row_index][column_index] = temp_matrix[i];
             i++;
@@ -416,11 +416,11 @@ Matrix Matrix::copyMatrix(){
     return newMatrix;
 }
 
-float Matrix::det(){
+DATA_TYPE Matrix::det(){
     if(columns != rows){
         throw std::invalid_argument("Matrix must be square to calculate determinant.\n");
     }
-    float result = det_rec(matrix, rows);
+    DATA_TYPE result = det_rec(matrix, rows);
     return result;
 }
 
@@ -469,13 +469,13 @@ Matrix Matrix::reducedRowEchelonForm(){
 
         leading_entry_column_index = chosen_column;
         reducedMatrix.swap_rows(chosen_row, leading_entry_row_index);
-        float scalar_to_norm_row = 1 / reducedMatrix.matrix[leading_entry_row_index][leading_entry_column_index];
+        DATA_TYPE scalar_to_norm_row = 1 / reducedMatrix.matrix[leading_entry_row_index][leading_entry_column_index];
         reducedMatrix.scalar_row(leading_entry_row_index, scalar_to_norm_row);
 
         for (int row_below_index = leading_entry_row_index + 1; row_below_index < reducedMatrix.rows; row_below_index++){
             //If it equals zero we don't need to do anything
             if (reducedMatrix.matrix[row_below_index][leading_entry_column_index] != 0){
-                float scalar_to_norm_row = -1 / reducedMatrix.matrix[row_below_index][leading_entry_column_index];
+                DATA_TYPE scalar_to_norm_row = -1 / reducedMatrix.matrix[row_below_index][leading_entry_column_index];
                 reducedMatrix.scalar_row(row_below_index, scalar_to_norm_row);
                 reducedMatrix.add_rows(row_below_index, leading_entry_row_index);
             }
@@ -491,7 +491,7 @@ Matrix Matrix::reducedRowEchelonForm(){
         if(leading_entry_column < reducedMatrix.columns){
             for (int above_row_index = row_index - 1; above_row_index >= 0; above_row_index--){
                 if(reducedMatrix.matrix[above_row_index][leading_entry_column] != 0){
-                    float scalar_to_norm_row = -1 * reducedMatrix.matrix[above_row_index][leading_entry_column];
+                    DATA_TYPE scalar_to_norm_row = -1 * reducedMatrix.matrix[above_row_index][leading_entry_column];
                     reducedMatrix.add_rows(above_row_index, row_index, scalar_to_norm_row);
                 }
             }
@@ -526,13 +526,13 @@ void Matrix::reducedRowEchelonForm_(){
 
         leading_entry_column_index = chosen_column;
         swap_rows(chosen_row, leading_entry_row_index);
-        float scalar_to_norm_row = 1 / matrix[leading_entry_row_index][leading_entry_column_index];
+        DATA_TYPE scalar_to_norm_row = 1 / matrix[leading_entry_row_index][leading_entry_column_index];
         scalar_row(leading_entry_row_index, scalar_to_norm_row);
 
         for (int row_below_index = leading_entry_row_index + 1; row_below_index < rows; row_below_index++){
             //If it equals zero we don't need to do anything
             if (matrix[row_below_index][leading_entry_column_index] != 0){
-                float scalar_to_norm_row = -1 / matrix[row_below_index][leading_entry_column_index];
+                DATA_TYPE scalar_to_norm_row = -1 / matrix[row_below_index][leading_entry_column_index];
                 scalar_row(row_below_index, scalar_to_norm_row);
                 add_rows(row_below_index, leading_entry_row_index);
             }
@@ -548,7 +548,7 @@ void Matrix::reducedRowEchelonForm_(){
         if(leading_entry_column < columns){
             for (int above_row_index = row_index - 1; above_row_index >= 0; above_row_index--){
                 if(matrix[above_row_index][leading_entry_column] != 0){
-                    float scalar_to_norm_row = -1 * matrix[above_row_index][leading_entry_column];
+                    DATA_TYPE scalar_to_norm_row = -1 * matrix[above_row_index][leading_entry_column];
                     add_rows(above_row_index, row_index, scalar_to_norm_row);
                 }
             }
@@ -573,7 +573,7 @@ Matrix Matrix::inverse(){
     //We will get the inverse by taking the matrix and joining the identity matrix to the left of it and then making the rref
     //Expand each row by twice the number of columns
     for (int row_index = 0; row_index < rows; row_index++){
-        inverseMatrix.matrix[row_index] = (float *) realloc(inverseMatrix.matrix[row_index], sizeof(float) * columns * 2);
+        inverseMatrix.matrix[row_index] = (DATA_TYPE *) realloc(inverseMatrix.matrix[row_index], sizeof(DATA_TYPE) * columns * 2);
         for (int column_index = columns; column_index < 2 * columns; column_index++){
             if (column_index == row_index + columns){
                 inverseMatrix.matrix[row_index][column_index] = 1;
@@ -589,7 +589,7 @@ Matrix Matrix::inverse(){
         for(int column_index = 0; column_index < columns * 2; column_index++){
             inverseMatrix.matrix[row_index][column_index] = inverseMatrix.matrix[row_index][column_index + columns];
         }
-        inverseMatrix.matrix[row_index] = (float *)realloc(inverseMatrix.matrix[row_index], sizeof(float) * columns);
+        inverseMatrix.matrix[row_index] = (DATA_TYPE *)realloc(inverseMatrix.matrix[row_index], sizeof(DATA_TYPE) * columns);
     }
     inverseMatrix.columns /= 2;
     changeZeros(inverseMatrix);
@@ -598,19 +598,19 @@ Matrix Matrix::inverse(){
 
 void Matrix::swap_rows(int row_a, int row_b){
     for (int i = 0; i < columns; i++){
-        float temp = matrix[row_a][i];
+        DATA_TYPE temp = matrix[row_a][i];
         matrix[row_a][i] = matrix[row_b][i];
         matrix[row_b][i] = temp;
     }
 }
 
-void Matrix::add_rows(int row_a, int row_b, float scalar){
+void Matrix::add_rows(int row_a, int row_b, DATA_TYPE scalar){
     for (int i = 0; i < columns; i++){
         matrix[row_a][i] += matrix[row_b][i] * scalar;
     }
 }
 
-void Matrix::scalar_row(int row, float scalar){
+void Matrix::scalar_row(int row, DATA_TYPE scalar){
     for (int i = 0; i < columns; i++){
         matrix[row][i] *= scalar;
     }
@@ -618,19 +618,19 @@ void Matrix::scalar_row(int row, float scalar){
 
 void Matrix::swap_columns(int column_a, int column_b){
     for (int i = 0; i < rows; i++){
-        float temp = matrix[i][column_a];
+        DATA_TYPE temp = matrix[i][column_a];
         matrix[i][column_a] = matrix[i][column_b];
         matrix[i][column_b] = temp;
     }
 }
 
-void Matrix::add_columns(int column_a, int column_b, float scalar){
+void Matrix::add_columns(int column_a, int column_b, DATA_TYPE scalar){
     for (int i = 0; i < rows; i++){
         matrix[i][column_a] += matrix[i][column_b] * scalar;
     }
 }
 
-void Matrix::scalar_columns(int column, float scalar){
+void Matrix::scalar_columns(int column, DATA_TYPE scalar){
     for (int i = 0; i < rows; i++){
         matrix[i][column] *= scalar;
     }
@@ -642,7 +642,7 @@ void Matrix::joinRight_(Matrix rightMatrix){
     }
     int new_columns = columns + rightMatrix.columns;
     for (int row_index = 0; row_index < rows; row_index++){
-        matrix[row_index] = (float *)realloc(matrix[row_index], sizeof(float) * new_columns);
+        matrix[row_index] = (DATA_TYPE *)realloc(matrix[row_index], sizeof(DATA_TYPE) * new_columns);
         for (int column_index = 0; column_index < rightMatrix.columns; column_index++){
             matrix[row_index][column_index + columns] = rightMatrix.matrix[row_index][column_index];
         }
@@ -656,9 +656,9 @@ void Matrix::unionBelow(Matrix bottomMatrix){
         throw;
     }
     int new_rows = rows + bottomMatrix.rows;
-    matrix = (float **)realloc(matrix, sizeof(float *) * new_rows);
+    matrix = (DATA_TYPE **)realloc(matrix, sizeof(DATA_TYPE *) * new_rows);
     for (int row_index = rows; row_index < new_rows; row_index++){
-        matrix[row_index] = (float *)malloc(sizeof(float) * columns);
+        matrix[row_index] = (DATA_TYPE *)malloc(sizeof(DATA_TYPE) * columns);
         for (int column_index = 0; column_index < columns; column_index++){
             matrix[row_index][column_index] = bottomMatrix.matrix[row_index - rows][column_index];
         }
@@ -767,9 +767,9 @@ return resultMatrix;
 void Matrix::convolution_(Matrix convolutionMatrix, int stride_rows, int stride_columns, bool normalize){
     Matrix tempMatrix = convolution(*this, convolutionMatrix, stride_rows, stride_columns, normalize);
     for (int row_index = 0; row_index < rows; row_index++){
-        matrix[row_index] = (float*)realloc(matrix[row_index], sizeof(float) * columns / stride_columns);
+        matrix[row_index] = (DATA_TYPE*)realloc(matrix[row_index], sizeof(DATA_TYPE) * columns / stride_columns);
     }
-    matrix = (float**)realloc(matrix, sizeof(float*) * rows / stride_rows);
+    matrix = (DATA_TYPE**)realloc(matrix, sizeof(DATA_TYPE*) * rows / stride_rows);
     rows /= stride_rows;
     columns /= stride_columns;
     for (int row_index = 0; row_index < rows; row_index++){
@@ -783,9 +783,9 @@ void Matrix::convolution_(Matrix convolutionMatrix, int stride_rows, int stride_
 void Matrix::pooling_(int pooling_rows, int pooling_columns, int stride_rows, int stride_columns){
     Matrix tempMatrix = pooling(pooling_rows, pooling_columns, stride_rows, stride_columns);
     for (int row_index = 0; row_index < rows; row_index++){
-        matrix[row_index] = (float*)realloc(matrix[row_index], sizeof(float) * columns / stride_columns);
+        matrix[row_index] = (DATA_TYPE*)realloc(matrix[row_index], sizeof(DATA_TYPE) * columns / stride_columns);
     }
-    matrix = (float**)realloc(matrix, sizeof(float*) * rows / stride_rows);
+    matrix = (DATA_TYPE**)realloc(matrix, sizeof(DATA_TYPE*) * rows / stride_rows);
     rows /= stride_rows;
     columns /= stride_columns;
     for (int row_index = 0; row_index < rows; row_index++){
@@ -848,7 +848,7 @@ Matrix Matrix::dot(Matrix A, Matrix B){
     //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
     for (int row_index = 0; row_index < A.rows; row_index++){
         for (int column_index = 0; column_index < B.columns; column_index++){
-            float value = 0;
+            DATA_TYPE value = 0;
             for (int i = 0; i < A.columns; i++){
                 value += A.matrix[row_index][i] * B.matrix[i][column_index];
             }
@@ -875,7 +875,7 @@ Matrix Matrix::add(Matrix A, Matrix B){
     return newMatrix;
 }
 
-Matrix Matrix::scalar(Matrix A, float scalar){
+Matrix Matrix::scalar(Matrix A, DATA_TYPE scalar){
     Matrix newMatrix(A.rows, A.columns);
     //newMatrix[row][col] = SUM(A[row][i] * B[i][col])
     for (int row_index = 0; row_index < A.rows; row_index++){
@@ -887,18 +887,18 @@ Matrix Matrix::scalar(Matrix A, float scalar){
     return newMatrix;
 }
 
-float Matrix::det_rec(float **matrix, int n){
+DATA_TYPE Matrix::det_rec(DATA_TYPE **matrix, int n){
     //The det of a 1x1 matrix is the value of the only entry in the matrix
     if(n == 1){
         return **matrix;
     }
-    float current_det = 0;
+    DATA_TYPE current_det = 0;
     int reduce_row_index = 0;
     for (int reduce_column_index = 0; reduce_column_index < n; reduce_column_index++){
         //Generate smaller matrix relevant to the current index
-        float **smaller_matrix = (float**)malloc(sizeof(float*) * (n - 1));
+        DATA_TYPE **smaller_matrix = (DATA_TYPE**)malloc(sizeof(DATA_TYPE*) * (n - 1));
         for (int i = 0; i < n - 1; i++){
-            smaller_matrix[i] = (float*)malloc(sizeof(float) * (n - 1));
+            smaller_matrix[i] = (DATA_TYPE*)malloc(sizeof(DATA_TYPE) * (n - 1));
         }
         //populate smaller matrix
         for (int row_index = 1; row_index < n; row_index++){
@@ -911,7 +911,7 @@ float Matrix::det_rec(float **matrix, int n){
             }
         }
         //Get determinant for smaller matrix
-        float smaller_det = det_rec(smaller_matrix, n - 1);
+        DATA_TYPE smaller_det = det_rec(smaller_matrix, n - 1);
         int sign = 1;
         if (reduce_column_index % 2 == 1){
             sign = -1;
@@ -951,13 +951,13 @@ Matrix Matrix::reducedRowEchelonForm(Matrix M){
 
         leading_entry_column_index = chosen_column;
         reducedMatrix.swap_rows(chosen_row, leading_entry_row_index);
-        float scalar_to_norm_row = 1 / reducedMatrix.matrix[leading_entry_row_index][leading_entry_column_index];
+        DATA_TYPE scalar_to_norm_row = 1 / reducedMatrix.matrix[leading_entry_row_index][leading_entry_column_index];
         reducedMatrix.scalar_row(leading_entry_row_index, scalar_to_norm_row);
 
         for (int row_below_index = leading_entry_row_index + 1; row_below_index < reducedMatrix.rows; row_below_index++){
             //If it equals zero we don't need to do anything
             if (reducedMatrix.matrix[row_below_index][leading_entry_column_index] != 0){
-                float scalar_to_norm_row = -1 / reducedMatrix.matrix[row_below_index][leading_entry_column_index];
+                DATA_TYPE scalar_to_norm_row = -1 / reducedMatrix.matrix[row_below_index][leading_entry_column_index];
                 reducedMatrix.scalar_row(row_below_index, scalar_to_norm_row);
                 reducedMatrix.add_rows(row_below_index, leading_entry_row_index);
             }
@@ -973,7 +973,7 @@ Matrix Matrix::reducedRowEchelonForm(Matrix M){
         if(leading_entry_column < reducedMatrix.columns){
             for (int above_row_index = row_index - 1; above_row_index >= 0; above_row_index--){
                 if(reducedMatrix.matrix[above_row_index][leading_entry_column] != 0){
-                    float scalar_to_norm_row = -1 * reducedMatrix.matrix[above_row_index][leading_entry_column];
+                    DATA_TYPE scalar_to_norm_row = -1 * reducedMatrix.matrix[above_row_index][leading_entry_column];
                     reducedMatrix.add_rows(above_row_index, row_index, scalar_to_norm_row);
                 }
             }
@@ -1016,12 +1016,12 @@ Matrix Matrix::convolution (Matrix sourceMatrix, Matrix convolutionMatrix, int s
     return resultMatrix;
 }
 
-Matrix operator * (float scalar, Matrix M){
+Matrix operator * (DATA_TYPE scalar, Matrix M){
     int rows = M.getRows();
     int columns = M.getColumns();
-    float** currentMatix = M.getMatrix();
+    DATA_TYPE** currentMatix = M.getMatrix();
     Matrix newMatrix(rows, columns);
-    float** newMatrix_matrix = newMatrix.getMatrix();
+    DATA_TYPE** newMatrix_matrix = newMatrix.getMatrix();
     for (int row_index = 0; row_index < rows; row_index++){
         for (int column_index = 0; column_index < columns; column_index++){
             newMatrix_matrix[row_index][column_index] = currentMatix[row_index][column_index] * scalar;
